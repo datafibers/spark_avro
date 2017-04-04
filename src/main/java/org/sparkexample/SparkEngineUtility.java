@@ -2,9 +2,15 @@ package org.sparkexample;
 
 import com.google.common.collect.Lists;
 import org.apache.avro.Schema;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 
 /**
@@ -103,6 +109,34 @@ public class SparkEngineUtility {
 
             return objectList;
         }
+        return null;
+    }
+
+    /**
+     * Read avro schema file from HDFS into a string.
+     * @param fs
+     * @param filePath
+     * @return String of schema
+     */
+    public static String readHDFSFile(FileSystem fs, String filePath) {
+        String line = null;
+        StringBuilder stringBuilder = new StringBuilder();
+
+        try {
+            BufferedReader bfr = new BufferedReader(
+                    new InputStreamReader(fs.open(new Path(filePath)), "UTF-8")
+            );
+
+            while ((line = bfr.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+
+            return stringBuilder.toString();
+
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+
         return null;
     }
 
