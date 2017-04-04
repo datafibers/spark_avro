@@ -42,8 +42,7 @@ public class SparkColumnFilterAvroProducer implements Serializable {
             SparkConf sparkConf = new SparkConf().setMaster("local[*]").setAppName("SparkColumnFilterAvroProducer");
 
             JavaSparkContext javaSparkContext = new JavaSparkContext(sparkConf);
-            JavaRDD<String> content =
-                    javaSparkContext.textFile(path);
+            JavaRDD<String> content = javaSparkContext.textFile(path);
 
             JavaRDD<String> contentFiltered = content.filter(new Function<String, Boolean>() {
                 @Override
