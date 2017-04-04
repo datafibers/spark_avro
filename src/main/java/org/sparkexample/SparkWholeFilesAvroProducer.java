@@ -25,7 +25,7 @@ public class SparkWholeFilesAvroProducer implements Serializable {
 
     public static void main(String[] args) {
         // Run this only in Windows
-        if(System.getProperty("os.name").toUpperCase().contains("WINDOWS"))
+        if (System.getProperty("os.name").toUpperCase().contains("WINDOWS"))
             System.setProperty("hadoop.home.dir", Paths.get("src/main/resources").toAbsolutePath().toString());
 
         SparkWholeFilesAvroProducer wholeTextFiles = new SparkWholeFilesAvroProducer();
@@ -82,7 +82,7 @@ public class SparkWholeFilesAvroProducer implements Serializable {
 
             FileUtils.deleteDirectory(new File(tempFolder)); //TODO delete by HDFS or oozie
 
-        }catch (IOException ioe) {
+        } catch (IOException ioe) {
             ioe.printStackTrace();
         }
 
