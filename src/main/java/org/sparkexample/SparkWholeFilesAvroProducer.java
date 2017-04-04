@@ -21,14 +21,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 
-public class SparkWholeTextFilesAvroProducer implements Serializable {
+public class SparkWholeFilesAvroProducer implements Serializable {
 
     public static void main(String[] args) {
         // Run this only in Windows
         if(System.getProperty("os.name").toUpperCase().contains("WINDOWS"))
             System.setProperty("hadoop.home.dir", Paths.get("src/main/resources").toAbsolutePath().toString());
 
-        SparkWholeTextFilesAvroProducer wholeTextFiles = new SparkWholeTextFilesAvroProducer();
+        SparkWholeFilesAvroProducer wholeTextFiles = new SparkWholeFilesAvroProducer();
         wholeTextFiles.run(
                 "|",
                 Paths.get("src/main/resources/data").toAbsolutePath().toString(),

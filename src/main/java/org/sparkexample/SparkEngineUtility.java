@@ -1,33 +1,22 @@
 package org.sparkexample;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import com.google.common.io.Files;
 import org.apache.avro.Schema;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
-import org.codehaus.jackson.JsonNode;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.file.Paths;
-import java.sql.Struct;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
- * Created by dadu on 03/04/2017.
+ * Spark Utilities for Avro data
+ *
  */
 public class SparkEngineUtility {
 
     /**
      * The equivalent Spark SQL schema for the given Avro schema.
+     * @param schema
+     * @return Spark SQL structType schema
      */
     public static StructType structTypeForSchema(Schema schema) {
         List<StructField> fields = Lists.newArrayList();
@@ -40,6 +29,9 @@ public class SparkEngineUtility {
             }
 
             switch (fieldType) {
+                case STRING:
+                    fields.add(DataTypes.createStructField(field.name(), DataTypes.StringType, true));
+                    break;
                 case DOUBLE:
                     fields.add(DataTypes.createStructField(field.name(), DataTypes.DoubleType, true));
                     break;
@@ -51,9 +43,6 @@ public class SparkEngineUtility {
                     break;
                 case LONG:
                     fields.add(DataTypes.createStructField(field.name(), DataTypes.LongType, true));
-                    break;
-                case STRING:
-                    fields.add(DataTypes.createStructField(field.name(), DataTypes.StringType, true));
                     break;
                 case BOOLEAN:
                     fields.add(DataTypes.createStructField(field.name(), DataTypes.BooleanType, true));
@@ -68,8 +57,10 @@ public class SparkEngineUtility {
 
     /**
      * Decode Csv to Object[] according to avro schema
+     *
      * @param line
-     * @return struct of decoded
+     * @param dataSchemaString
+     * @return array of object
      */
     public static Object[] structDecodingFromLine(String[] line, String dataSchemaString) {
 
@@ -85,22 +76,24 @@ public class SparkEngineUtility {
                 Schema.Type schemaType = fields.get(index).schema().getType();
                 if (schemaType != null) {
                     switch (schemaType) {
-                        case STRING: {
+                        case STRING:
                             value = line[index];
                             break;
-                        }
-                        case INT: {
+                        case DOUBLE:
+                            value = line[index];
+                            break;
+                        case FLOAT:
+                            value = line[index];
+                            break;
+                        case INT:
                             value = Integer.parseInt(line[index]);
                             break;
-                        }
-                        case LONG: {
+                        case LONG:
                             value = Long.parseLong(line[index]);
                             break;
-                        }
-                        case BOOLEAN: {
+                        case BOOLEAN:
                             value = Boolean.parseBoolean(line[index]);
                             break;
-                        }
                         default:
                             value = line[index];
                     }
@@ -113,29 +106,4 @@ public class SparkEngineUtility {
         return null;
     }
 
-    public static void main(String[] args) {
-
-        try {
-            String schemaContent = Files.toString(
-                    new File(
-                            Paths.get("src/main/resources/schema", "twitter.avsc").toAbsolutePath().toString()
-                    ), Charsets.UTF_8);
-            structDecodingFromLine("will|this is comments|231231231".split("\\|"), schemaContent);
-
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
-        }
-
-
-
-
-
-        String content = "header1\r\nheader2\r\ncontent\r\ncontent\r\ntrailer\r\n";
-        ArrayList<String> contentArrayList = new ArrayList<String>(Arrays.asList(content.split("[\r\n]+")));
-        contentArrayList.remove(0);
-        contentArrayList.remove(0);
-        contentArrayList.remove(contentArrayList.size() - 1);
-        String test = String.join("\r\n", contentArrayList);
-        System.out.println(test);
-    }
 }
