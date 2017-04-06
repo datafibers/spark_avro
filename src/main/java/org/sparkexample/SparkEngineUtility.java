@@ -2,6 +2,7 @@ package org.sparkexample;
 
 import com.google.common.collect.Lists;
 import org.apache.avro.Schema;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.spark.sql.types.DataTypes;
@@ -111,7 +112,6 @@ public class SparkEngineUtility {
         }
         return null;
     }
-
     /**
      * Read avro schema file from HDFS into a string.
      * @param fs

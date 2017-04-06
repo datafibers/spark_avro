@@ -1,11 +1,11 @@
 H|header03
-H|column names03
-01AAAA03|test a comment|1366150681
-02BBBB03|test is sample|1366154481
-03CCCC03|test spark laa|1366150682
-04DDDD03|Comment sample|1366154485
-05EEEE03|test comments?|1366150685
-06FFFF03|Comment  wrong|1366154487
-07GGGG03|test is a good|1366150687
-08HHHH03|this ju sample|1366154482
-T|trailer03
+H|name|comments|time
+D|01AAAA03|test a comment|1366150681
+D|02BBBB03|test is sample|1366154481
+D|03CCCC03|test spark laa|1366150682
+D|04DDDD03|Comment sample|1366154485
+D|05EEEE03|test comments?|1366150685
+D|06FFFF03|Comment  wrong|1366154487
+D|07GGGG03|test is a good|1366150687
+D|08HHHH03|this ju sample|1366154482
+T|8
