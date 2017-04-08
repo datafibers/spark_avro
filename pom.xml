@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.sparkexamples</groupId>
-    <artifactId>first-example</artifactId>
+    <groupId>org.datafibers</groupId>
+    <artifactId>spark_avro</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -42,13 +42,6 @@
             <version>2.0.1</version>
         </dependency>
 
-        <!-- Logging -->
-<!--        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.22</version>
-        </dependency>-->
-
         <!-- Testing -->
         <dependency>
             <groupId>junit</groupId>
@@ -81,15 +74,6 @@
                                     </excludes>
                                 </filter>
                             </filters>
-                            <transformer
-                                    implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                <resource>reference.conf</resource>
-                            </transformer>
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.sparkexample.SparkColumnFilterAvroProducer</mainClass>
-                                </transformer>
-                            </transformers>
                         </configuration>
                     </execution>
                 </executions>

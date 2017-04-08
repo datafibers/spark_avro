@@ -1,4 +1,4 @@
-package org.sparkexample;
+package org.datafibers;
 
 import org.apache.avro.Schema;
 import org.apache.commons.csv.CSVFormat;
@@ -16,13 +16,13 @@ import java.io.Serializable;
 import java.io.StringReader;
 
 /**
- * SparkColumnFilterAvroProducer
+ * CSVColumnFilterAvroProducer
  * <p>
  * Read all test files as RDDs with textFiles
  * Remove specific rows start from HEADER_IDENTIFIER or TRAILER_IDENTIFIER completely!
  * The first n columns are removed by csv line size - schema size
  */
-public class SparkColumnFilterAvroProducer implements Serializable {
+public class CSVColumnFilterAvroProducer implements Serializable {
 
     final static String HEADER_IDENTIFIER = "H";
     final static String TRAILER_IDENTIFIER = "T";
@@ -35,7 +35,7 @@ public class SparkColumnFilterAvroProducer implements Serializable {
 
     public static void main(String[] args) {
 
-        SparkColumnFilterAvroProducer wholeTextFiles = new SparkColumnFilterAvroProducer();
+        CSVColumnFilterAvroProducer wholeTextFiles = new CSVColumnFilterAvroProducer();
         wholeTextFiles.run(args[0], args[1], args[2]);
     }
 
@@ -71,13 +71,13 @@ public class SparkColumnFilterAvroProducer implements Serializable {
                                 columns[i - 1] = csvLine.get(j);
                             }
 
-                            return RowFactory.create(SparkEngineUtility.structDecodingFromLine(columns, schemaString));
+                            return RowFactory.create(DFSchemaUtility.structDecodingFromLine(columns, schemaString));
                         }
                 );
 
         SQLContext sqlContext = new SQLContext(javaSparkContext);
 
-        StructType schema = SparkEngineUtility.structTypeForSchema(avroSchema);
+        StructType schema = DFSchemaUtility.structTypeForSchema(avroSchema);
 
         sqlContext.createDataFrame(rowRDD, schema)
                 .coalesce(1)

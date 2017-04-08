@@ -1,4 +1,4 @@
-package org.sparkexample;
+package org.datafibers;
 
 import org.apache.avro.Schema;
 import org.apache.spark.SparkConf;
@@ -9,18 +9,18 @@ import org.apache.spark.sql.types.StructType;
 import java.io.Serializable;
 
 /**
- *  SparkHeaderFilterAvroProducer
+ *  CSVHeaderFilterAvroProducer
  *
  *  Read whole test files as RDD with textFile
  *  Remove header row (1st row) only and completely!
  */
-public class SparkHeaderFilterAvroProducer implements Serializable {
+public class CSVHeaderFilterAvroProducer implements Serializable {
 
     final static String AVRO_FILE_WRITE_MODE = "overwrite"; // Can be append as well
 
     public static void main(String[] args) {
 
-        SparkHeaderFilterAvroProducer wholeTextFiles = new SparkHeaderFilterAvroProducer();
+        CSVHeaderFilterAvroProducer wholeTextFiles = new CSVHeaderFilterAvroProducer();
         wholeTextFiles.run(args[0], args[1], args[2]);
     }
 
@@ -37,7 +37,7 @@ public class SparkHeaderFilterAvroProducer implements Serializable {
 
         String schemaString = String.join("", javaSparkContext.textFile(schemaPath).collect());
         Schema avroSchema = new Schema.Parser().parse(schemaString);
-        StructType schema = SparkEngineUtility.structTypeForSchema(avroSchema);
+        StructType schema = DFSchemaUtility.structTypeForSchema(avroSchema);
 
         sqlContext.read()
                 .format("com.databricks.spark.csv")

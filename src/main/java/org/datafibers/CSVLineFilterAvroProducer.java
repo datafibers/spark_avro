@@ -1,4 +1,4 @@
-package org.sparkexample;
+package org.datafibers;
 
 import org.apache.avro.Schema;
 import org.apache.commons.csv.CSVFormat;
@@ -19,14 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *  SparkLineFilterAvroProducer
+ *  CSVLineFilterAvroProducer
  *
  *  Read whole test file as RDD to index line number in each text files with wholeTextFiles
  *  Remove specific rows index from header or trailer as well as columns completely!
  *  The header and trailer number of rows are specified from headerRowRemoved and trailerRowRemoved
  *  The first n columns are removed by csv line size - schema size
  */
-public class SparkLineFilterAvroProducer implements Serializable {
+public class CSVLineFilterAvroProducer implements Serializable {
 
     final static char FILE_DELIMITER = '|';
     final static String FILE_LINE_END = "\n";
@@ -37,7 +37,7 @@ public class SparkLineFilterAvroProducer implements Serializable {
 
     public static void main(String[] args) {
 
-        SparkLineFilterAvroProducer wholeTextFiles = new SparkLineFilterAvroProducer();
+        CSVLineFilterAvroProducer wholeTextFiles = new CSVLineFilterAvroProducer();
         wholeTextFiles.run(Integer.parseInt(args[0]), Integer.parseInt(args[1]), args[2], args[3], args[4]);
     }
 
@@ -104,13 +104,13 @@ public class SparkLineFilterAvroProducer implements Serializable {
                                 columns[i - 1] = csvLine.get(j);
                             }
 
-                            return RowFactory.create(SparkEngineUtility.structDecodingFromLine(columns, schemaString));
+                            return RowFactory.create(DFSchemaUtility.structDecodingFromLine(columns, schemaString));
                         }
                 );
 
         SQLContext sqlContext = new SQLContext(javaSparkContext);
 
-        StructType schema = SparkEngineUtility.structTypeForSchema(avroSchema);
+        StructType schema = DFSchemaUtility.structTypeForSchema(avroSchema);
 
         sqlContext.createDataFrame(rowRDD, schema)
                 .coalesce(1)

@@ -1,4 +1,4 @@
-package org.sparkexample;
+package org.datafibers;
 
 import com.google.common.collect.Lists;
 import org.apache.avro.Schema;
@@ -11,7 +11,7 @@ import java.util.List;
  * Spark Utilities for Avro data
  *
  */
-public class SparkEngineUtility {
+public class DFSchemaUtility {
 
     /**
      * The equivalent Spark SQL schema for the given Avro schema.
