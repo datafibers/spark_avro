@@ -117,10 +117,7 @@ public class CSVLineFilterAvroProducer implements Serializable {
                 .write()
                 .mode(AVRO_FILE_WRITE_MODE)
                 .format("com.databricks.spark.avro")
-                .save(avroPath)
-        ;
-
-
+                .save(avroPath);
     }
 
     private void run(String sourcePath, String schemaPath, String avroPath) {

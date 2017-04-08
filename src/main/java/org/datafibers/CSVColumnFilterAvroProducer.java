@@ -24,8 +24,8 @@ import java.io.StringReader;
  */
 public class CSVColumnFilterAvroProducer implements Serializable {
 
-    final static String HEADER_IDENTIFIER = "H";
-    final static String TRAILER_IDENTIFIER = "T";
+    final static String HEADER_IDENTIFIER = "\"H";
+    final static String TRAILER_IDENTIFIER = "\"T";
     final static char FILE_DELIMITER = '|';
     final static String FILE_LINE_END = "\n";
     final static String AVRO_FILE_WRITE_MODE = "overwrite"; // Can be append as well
@@ -54,8 +54,8 @@ public class CSVColumnFilterAvroProducer implements Serializable {
 
         JavaRDD<String> content = javaSparkContext.textFile(path);
         JavaRDD<String> contentFiltered = content
-                .filter(line -> !line.contains(HEADER_IDENTIFIER))
-                .filter(line -> !line.contains(TRAILER_IDENTIFIER));
+                .filter(line -> !line.startsWith(HEADER_IDENTIFIER))
+                .filter(line -> !line.startsWith(TRAILER_IDENTIFIER));
 
         JavaRDD<Row> rowRDD = contentFiltered
                 .map(line -> {
@@ -83,9 +83,7 @@ public class CSVColumnFilterAvroProducer implements Serializable {
                 .coalesce(1)
                 .write()
                 .mode(AVRO_FILE_WRITE_MODE)
-                .format("com.databricks.spark.avro")
-                .save(avroPath)
-        ;
-
+                .format("com.databricks.spark.csv")
+                .save(avroPath);
     }
 }
