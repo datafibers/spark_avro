@@ -8,24 +8,26 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.FlatMapFunction;
-import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.types.StructType;
-import scala.Tuple2;
 
 import java.io.Serializable;
 import java.io.StringReader;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *  SparkLineFilterAvroProducer
+ *
+ *  Read whole test file as RDD to index line number in each text files with wholeTextFiles
+ *  Remove specific rows index from header or trailer as well as columns completely!
+ *  The header and trailer number of rows are specified from headerRowRemoved and trailerRowRemoved
+ *  The first n columns are removed by csv line size - schema size
+ */
 public class SparkLineFilterAvroProducer implements Serializable {
 
-    final static String HEADER_IDENTIFIER = "H";
-    final static String TRAILER_IDENTIFIER = "T";
     final static char FILE_DELIMITER = '|';
     final static String FILE_LINE_END = "\n";
     final static String AVRO_FILE_WRITE_MODE = "overwrite"; // Can be append as well
@@ -34,23 +36,20 @@ public class SparkLineFilterAvroProducer implements Serializable {
     CSVFormat csvFileFormat = CSVFormat.EXCEL.withDelimiter(FILE_DELIMITER).withRecordSeparator(FILE_LINE_END);
 
     public static void main(String[] args) {
-        // Run this only in Windows
-        if (System.getProperty("os.name").toUpperCase().contains("WINDOWS"))
-            System.setProperty("hadoop.home.dir", Paths.get("src/main/resources").toAbsolutePath().toString());
 
         SparkLineFilterAvroProducer wholeTextFiles = new SparkLineFilterAvroProducer();
-        wholeTextFiles.run(
-                2, 1,
-                args[0], //Paths.get("src/main/resources/data").toAbsolutePath().toString(),
-                args[1], //Paths.get("src/main/resources/schema", "twitter.avsc").toAbsolutePath().toString(),
-                args[2] //Paths.get("src/main/resources/avro").toAbsolutePath().toString()
-        );
+        wholeTextFiles.run(Integer.parseInt(args[0]), Integer.parseInt(args[1]), args[2], args[3], args[4]);
     }
+
 
     private void run(int headerRowRemoved, int trailerRowRemoved,
                      String sourcePath, String schemaPath, String avroPath) {
 
-        SparkConf sparkConf = new SparkConf().setMaster("local[*]").setAppName("SparkLineFilterAvroProducer");
+        String appName = "LineFilter - " + schemaPath.substring(
+                schemaPath.lastIndexOf(System.getProperty("file.separator")) + 1,
+                schemaPath.length());
+
+        SparkConf sparkConf = new SparkConf().setMaster("local[*]").setAppName(appName);
 
         JavaSparkContext javaSparkContext = new JavaSparkContext(sparkConf);
 
@@ -61,10 +60,8 @@ public class SparkLineFilterAvroProducer implements Serializable {
         JavaPairRDD<String, String> fileNameContentsRDD = javaSparkContext.wholeTextFiles(sourcePath);
 
         JavaRDD<String> contentFiltered = fileNameContentsRDD
-                .flatMap(new FlatMapFunction<Tuple2<String, String>, String>() {
-                    public Iterable<String> call(Tuple2<String, String> file) throws Exception {
+                .flatMap(file -> {
                         String content = file._2();
-
                         csvParser = new CSVParser(new StringReader(content), csvFileFormat);
                         List<CSVRecord> contentArrayList = csvParser.getRecords();
 
@@ -82,41 +79,34 @@ public class SparkLineFilterAvroProducer implements Serializable {
                         // Dummy copy since we cannot create new CSVRecord
                         for (CSVRecord c : contentArrayList) {
                             StringBuffer stringBuffer = new StringBuffer();
-                            for (int i = 0; i <= avroSchemaSize; i++) {
+                            for (int i = 0; i < avroSchemaSize; i++) {
                                 if (i >= 1) stringBuffer.append(FILE_DELIMITER);
                                 stringBuffer.append(c.get(i));
                             }
                             stringArrayList.add(stringBuffer.toString());
-
                         }
-
                         return stringArrayList;
                     }
-                });
+                );
 
 
         JavaRDD<Row> rowRDD = contentFiltered
-                .map(new Function<String, Row>() {
-                    @Override
-                    public Row call(String line) throws Exception {
+                .map(line -> {
+                            csvParser = new CSVParser(new StringReader(line), csvFileFormat);
+                            // Get first item only since we have one line
+                            CSVRecord csvLine = csvParser.getRecords().get(0);
+                            // Here remove the specific n column, n = csvLine.size() - schema.length
+                            int numberOfRemovedFromStart = csvLine.size() - avroSchemaSize;
+                            String[] columns = new String[avroSchemaSize];
 
-                        csvParser = new CSVParser(new StringReader(line), csvFileFormat);
-                        // Get first item only since we have one line
-                        CSVRecord csvLine = csvParser.getRecords().get(0);
-                        // Here remove the specific column, such as the first column with index = 0
-                        //csvLine.
-                        String[] columns = new String[avroSchemaSize];
+                            for (int i = 1, j = numberOfRemovedFromStart; i <= avroSchemaSize && j < csvLine.size();
+                                 i++, j++) {
+                                columns[i - 1] = csvLine.get(j);
+                            }
 
-                        for (int i = 1; i <= avroSchemaSize; i++) {
-                            columns[i - 1] = csvLine.get(i);
+                            return RowFactory.create(SparkEngineUtility.structDecodingFromLine(columns, schemaString));
                         }
-
-                        return RowFactory.create(
-                                SparkEngineUtility.structDecodingFromLine(
-                                        columns,
-                                        schemaString));
-                    }
-                });
+                );
 
         SQLContext sqlContext = new SQLContext(javaSparkContext);
 
