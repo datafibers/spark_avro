@@ -83,7 +83,7 @@ public class CSVColumnFilterAvroProducer implements Serializable {
                 .coalesce(1)
                 .write()
                 .mode(AVRO_FILE_WRITE_MODE)
-                .format("com.databricks.spark.csv")
+                .format("com.databricks.spark.avro")
                 .save(avroPath);
     }
 }
