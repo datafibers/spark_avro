@@ -11,7 +11,7 @@ import java.io.Serializable;
 /**
  *  SparkHeaderFilterAvroProducer
  *
- *  Read whole test file as RDD to index line number in each text files with wholeTextFiles
+ *  Read whole test files as RDD with textFile
  *  Remove header row (1st row) only and completely!
  */
 public class SparkHeaderFilterAvroProducer implements Serializable {
